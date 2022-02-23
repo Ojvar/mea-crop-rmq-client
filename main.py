@@ -4,7 +4,7 @@ from process_image import process_image
 
 # Constaints
 exchange = "mea-capture"
-route_key = "bw"
+route_key = "crop"
 durable = True
 
 # Create connection
