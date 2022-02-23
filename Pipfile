@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 pika = "*"
+opencv-python = "*"
 
 [dev-packages]
 

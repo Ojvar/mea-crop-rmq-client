@@ -1,9 +1,11 @@
 import pika
 import sys
+from process_image import process_image
 
 # Constaints
 exchange = "mea-capture"
 route_key = "bw"
+durable = True
 
 # Create connection
 credentials = pika.PlainCredentials('user', 'password')
@@ -14,7 +16,8 @@ connection = pika.BlockingConnection(parameters)
 channel = connection.channel()
 
 # Create exchange
-channel.exchange_declare(exchange=exchange, exchange_type='topic')
+channel.exchange_declare(
+    exchange=exchange, exchange_type='topic', durable=durable)
 
 # Create queue
 result = channel.queue_declare('', exclusive=True)
@@ -33,7 +36,7 @@ def shutdown():
 
 # Listener callback
 def callback(ch, method, properties, body):
-    body = body.decode("utf-8") 
+    body = body.decode("utf-8")
     print(" [x] %r:%r" % (method.routing_key, body))
 
     # EXIT
