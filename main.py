@@ -8,16 +8,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Constaints
-exchange = os.getenv.get("RABBITMQ_EXCHNAGE", "mea-capture")
-route_key = os.getenv.get("RABBITMQ_ROUTE_KEY", "crop")
-durable = os.getenv.get("RABBITMQ_DURABLE", "true") == "true"
+exchange = os.getenv("RABBITMQ_EXCHNAGE", "mea-capture")
+route_key = os.getenv("RABBITMQ_ROUTE_KEY", "crop")
+durable = os.getenv("RABBITMQ_DURABLE", "true") == "true"
 
 # Create connection
 credentials = pika.PlainCredentials(
-    os.getenv.get("RABBITMQ_USER", "user"),
-    os.getenv.get("RABBITMQ_PASSWORD", "password"))
-parameters = pika.ConnectionParameters(host=os.getenv.get("RABBITMQ_HOST", "localhost"),
-                                       port=int(os.getenv.get(
+    os.getenv("RABBITMQ_USER", "user"),
+    os.getenv("RABBITMQ_PASSWORD", "password"))
+parameters = pika.ConnectionParameters(host=os.getenv("RABBITMQ_HOST", "localhost"),
+                                       port=int(os.getenv(
                                            "RABBITMQ_PORT", "5672")),
                                        credentials=credentials)
 connection = pika.BlockingConnection(parameters)
@@ -25,7 +25,7 @@ channel = connection.channel()
 
 # Create exchange
 channel.exchange_declare(exchange=exchange,
-                         exchange_type=os.getenv.get("RABBITMQ_EXCHNAGE_TYPE", "fanout"), durable=durable)
+                         exchange_type=os.getenv("RABBITMQ_EXCHNAGE_TYPE", "fanout"), durable=durable)
 
 # Create queue
 result = channel.queue_declare('', exclusive=True)
