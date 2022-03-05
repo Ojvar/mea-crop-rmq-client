@@ -76,13 +76,22 @@ def process_image(data):
         if color_adjust:
             image = cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
 
-        # Crop Image
-        if crop:
-            image = crop_image(image, padding=padding)
+            # lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+            # l, a, b = cv2.split(lab)
+            # clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+            # cl = clahe.apply(l)
+            # limg = cv2.merge((cl, a, b))
+            # image = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
 
         # Apply sharpness filter
         if 0 != sharpness:
             image = sharp_image(image, value=sharpness)
+
+        # Crop Image
+        if crop:
+            crop_result = crop_image(image, padding=padding)
+            if (crop_result is not None):
+                image = crop_result
 
         # Apply BW filter
         if bw:
@@ -112,24 +121,24 @@ def sharp_image(image, value=5):
 
 
 def crop_image(img, coef=0.25, rCoef=4, padding=10):
-    heightImg, widthImg, _ = img.shape
-
     originalImage = img.copy()
-
+    heightImg, widthImg, _ = img.shape
     widthImg = int(widthImg * coef)
     heightImg = int(heightImg * coef)
     img = cv2.resize(img, (widthImg, heightImg))  # RESIZE IMAGE
+
+    blur_matrix = (7, 7)
 
     # CREATE A BLANK IMAGE FOR TESTING DEBUGING IF REQUIRED
     imgBlank = np.zeros((heightImg, widthImg, 3), np.uint8)
 
     # CONVERT IMAGE TO GRAY SCALE
     imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    imgBlur = cv2.GaussianBlur(imgGray, (5, 5), 1)  # ADD GAUSSIAN BLUR
+    imgBlur = cv2.GaussianBlur(imgGray, blur_matrix, 1)  # ADD GAUSSIAN BLUR
 
     imgThreshold = cv2.Canny(imgBlur, 255, 1)
 
-    kernel = np.ones((5, 5))
+    kernel = np.ones(blur_matrix)
     imgDial = cv2.dilate(imgThreshold, kernel, iterations=2)  # APPLY DILATION
     imgThreshold = cv2.erode(imgDial, kernel, iterations=1)  # APPLY EROSION
 
@@ -161,7 +170,7 @@ def crop_image(img, coef=0.25, rCoef=4, padding=10):
         imgWarpColored = cv2.resize(imgWarpColored, (widthImg, heightImg))
         imgAdaptiveThre = cv2.medianBlur(imgWarpColored, 3)
     else:
-        imgAdaptiveThre = img
+        imgAdaptiveThre = None
 
     return imgAdaptiveThre
 
