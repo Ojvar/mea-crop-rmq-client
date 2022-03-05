@@ -9,9 +9,29 @@ import numpy as np
 """
 
 
-def process_image(data, alpha=1.25, beta=25):
+def process_image(data):
     try:
         data = json.loads(data)
+
+        if 'alpha' not in data:
+            alpha = 1.25
+        else:
+            alpha = float(data['alpha'])
+
+        if 'beta' not in data:
+            beta = 1.0
+        else:
+            beta = float(data['beta'])
+
+        if 'rotate' not in data:
+            rotate = true
+        else:
+            rotate = bool(data['rotate'])
+
+        if 'padding' not in data:
+            padding = 5
+        else:
+            padding = int(data['padding'])
 
         source_path = data['source']
         target_path = data['target']
@@ -19,9 +39,14 @@ def process_image(data, alpha=1.25, beta=25):
         print("Correcting Image %s" % source_path)
         image = cv2.imread(source_path)
 
-        image = cv2.rotate(image, cv2.cv2.ROTATE_180)
-        image = crop_image(image)
+        if rotate:
+            image = cv2.rotate(image, cv2.cv2.ROTATE_180)
+
+        # Color correction
         image = cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
+
+        # Crop Image
+        image = crop_image(image, padding=padding)
 
         cv2.imwrite(target_path, image)
         print("Output Image %s" % target_path)
@@ -32,7 +57,7 @@ def process_image(data, alpha=1.25, beta=25):
         return False
 
 
-def crop_image(img, coef=0.25, rCoef=4, padding=20):
+def crop_image(img, coef=0.25, rCoef=4, padding=10):
     heightImg, widthImg, _ = img.shape
 
     originalImage = img.copy()
