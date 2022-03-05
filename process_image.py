@@ -13,6 +13,26 @@ def process_image(data):
     try:
         data = json.loads(data)
 
+        if 'crop' not in data:
+            crop = true
+        else:
+            crop = bool(data['crop'])
+
+        if 'color_adjust' not in data:
+            color_adjust = true
+        else:
+            color_adjust = bool(data['color_adjust'])
+
+        if 'bw_lower' not in data:
+            bw_lower = 120
+        else:
+            bw_lower = float(data['bw_lower'])
+
+        if 'bw_upper' not in data:
+            bw_upper = 255
+        else:
+            bw_upper = float(data['bw_upper'])
+
         if 'alpha' not in data:
             alpha = 1.25
         else:
@@ -28,10 +48,20 @@ def process_image(data):
         else:
             rotate = bool(data['rotate'])
 
+        if 'bw' not in data:
+            bw = false
+        else:
+            bw = bool(data['bw'])
+
         if 'padding' not in data:
             padding = 5
         else:
             padding = int(data['padding'])
+
+        if 'sharpness' not in data:
+            sharpness = 0
+        else:
+            sharpness = int(data['sharpness'])
 
         source_path = data['source']
         target_path = data['target']
@@ -43,10 +73,20 @@ def process_image(data):
             image = cv2.rotate(image, cv2.cv2.ROTATE_180)
 
         # Color correction
-        image = cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
+        if color_adjust:
+            image = cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
 
         # Crop Image
-        image = crop_image(image, padding=padding)
+        if crop:
+            image = crop_image(image, padding=padding)
+
+        # Apply sharpness filter
+        if 0 != sharpness:
+            image = sharp_image(image, value=sharpness)
+
+        # Apply BW filter
+        if bw:
+            image = convert_to_bw(image, bw_lower=bw_lower, bw_upper=bw_upper)
 
         cv2.imwrite(target_path, image)
         print("Output Image %s" % target_path)
@@ -55,6 +95,20 @@ def process_image(data):
         print("CONVERT ERROR \n %s \n %s" % (source_path, target_path))
         print(e)
         return False
+
+
+def convert_to_bw(image, bw_lower=120, bw_upper=255):
+    img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    ret, output = cv2.threshold(
+        img, bw_lower, bw_upper, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    return output
+
+
+def sharp_image(image, value=5):
+    kernel = np.array([[0, -1, 0],
+                       [-1, value, -1],
+                       [0, -1, 0]])
+    return cv2.filter2D(src=image, ddepth=-1, kernel=kernel)
 
 
 def crop_image(img, coef=0.25, rCoef=4, padding=10):
