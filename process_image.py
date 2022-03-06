@@ -52,8 +52,6 @@ def process_image(data):
             bw = False
         else:
             bw = bool(data['bw'])
-        print("BW I ")
-        print(bw)
 
         if 'padding' not in data:
             padding = 5
