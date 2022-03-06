@@ -76,13 +76,6 @@ def process_image(data):
         if color_adjust:
             image = cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
 
-            # lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
-            # l, a, b = cv2.split(lab)
-            # clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
-            # cl = clahe.apply(l)
-            # limg = cv2.merge((cl, a, b))
-            # image = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
-
         # Apply sharpness filter
         if 0 != sharpness:
             image = sharp_image(image, value=sharpness)
@@ -113,10 +106,12 @@ def convert_to_bw(image, bw_lower=120, bw_upper=255):
     return output
 
 
-def sharp_image(image, value=5):
-    kernel = np.array([[0, -1, 0],
-                       [-1, value, -1],
-                       [0, -1, 0]])
+def sharp_image(image, value=5.0):
+    value += 5
+    nValue = -1
+    kernel = np.array([[0, nValue, 0],
+                       [nValue, value, nValue],
+                       [0, nValue, 0]])
     return cv2.filter2D(src=image, ddepth=-1, kernel=kernel)
 
 
