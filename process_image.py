@@ -14,12 +14,12 @@ def process_image(data):
         data = json.loads(data)
 
         if 'crop' not in data:
-            crop = true
+            crop = True
         else:
             crop = bool(data['crop'])
 
         if 'color_adjust' not in data:
-            color_adjust = true
+            color_adjust = True
         else:
             color_adjust = bool(data['color_adjust'])
 
@@ -44,14 +44,16 @@ def process_image(data):
             beta = float(data['beta'])
 
         if 'rotate' not in data:
-            rotate = true
+            rotate = True
         else:
             rotate = bool(data['rotate'])
 
         if 'bw' not in data:
-            bw = false
+            bw = False
         else:
             bw = bool(data['bw'])
+        print("BW I ")
+        print(bw)
 
         if 'padding' not in data:
             padding = 5
@@ -81,20 +83,20 @@ def process_image(data):
             image = sharp_image(image, value=sharpness)
 
         # Crop Image
-        if crop:
+        if crop == True:
             crop_result = crop_image(image, padding=padding)
             if (crop_result is not None):
                 image = crop_result
 
         # Apply BW filter
-        if bw:
+        if bw == True:
             image = convert_to_bw(image, bw_lower=bw_lower, bw_upper=bw_upper)
+            print('converted to bw')
 
         cv2.imwrite(target_path, image)
         print("Output Image %s" % target_path)
         return True
     except Exception as e:
-        print("CONVERT ERROR \n %s \n %s" % (source_path, target_path))
         print(e)
         return False
 
@@ -108,10 +110,9 @@ def convert_to_bw(image, bw_lower=120, bw_upper=255):
 
 def sharp_image(image, value=5.0):
     value += 5
-    nValue = -1
-    kernel = np.array([[0, nValue, 0],
-                       [nValue, value, nValue],
-                       [0, nValue, 0]])
+    kernel = np.array([[0, -1, 0],
+                       [-1, value, -1],
+                       [0, -1, 0]])
     return cv2.filter2D(src=image, ddepth=-1, kernel=kernel)
 
 
